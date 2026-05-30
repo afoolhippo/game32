@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>カバ合戦</title>
+
+  <link rel="stylesheet" href="style.css?v=20260530-1" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- タイトル画面 -->
+    <section id="titleScreen" class="screen active">
+      <img id="titleImage" src="tittle.png" alt="カバ合戦" />
+      <p class="tapText">タップして開戦！</p>
+    </section>
+
+    <!-- ゲーム画面 -->
+    <section id="gameScreen" class="screen">
+      <div class="battleBg"></div>
+
+      <button id="backTitleButton" class="backTitleButton">タイトルへ</button>
+
+      <div class="statusArea">
+        <div class="armyBox">
+          <span class="armyName">カバ軍</span>
+          <strong id="playerSoldiers">100</strong>
+          <span>兵</span>
+        </div>
+
+        <div class="turnBox">
+          第<span id="turnCount">1</span>陣 / 10
+        </div>
+
+        <div class="armyBox enemyArmy">
+          <span class="armyName">タヌキ軍</span>
+          <strong id="enemySoldiers">100</strong>
+          <span>兵</span>
+        </div>
+      </div>
+
+      <div class="characterArea">
+        <img src="kaba.png" alt="カバ軍師" class="battleChar kabaChar" />
+        <img src="enemy.png" alt="タヌキ軍" class="battleChar enemyChar" />
+      </div>
+
+      <div class="messageBox">
+        <p id="hintText">タヌキ軍の動きを読め！</p>
+        <p id="resultText">兵法を選んでください</p>
+      </div>
+
+      <div class="ruleBox">
+        <span>⚔️ 攻める ＞ 🛡️ 守る</span>
+        <span>🛡️ 守る ＞ 🐎 回り込む</span>
+        <span>🐎 回り込む ＞ ⚔️ 攻める</span>
+      </div>
+
+      <div class="choiceArea">
+        <button class="choiceButton" data-action="attack">
+          ⚔️ 攻める
+          <small>守るに強い</small>
+        </button>
+        <button class="choiceButton" data-action="defend">
+          🛡️ 守る
+          <small>回り込むに強い</small>
+        </button>
+        <button class="choiceButton" data-action="flank">
+          🐎 回り込む
+          <small>攻めるに強い</small>
+        </button>
+      </div>
+    </section>
+
+    <!-- 結果画面 -->
+    <section id="resultScreen" class="screen">
+      <h1 id="resultTitle">結果</h1>
+
+      <img id="resultImage" src="title.png" alt="結果画像" />
+
+      <div class="resultPanel">
+        <p id="rankTitle">足軽隊長</p>
+        <p class="scoreText">
+          兵数 <strong id="finalScore">0</strong>
+        </p>
+        <p id="resultComment">また次の合戦で取り返そう！</p>
+      </div>
+
+      <div id="resultButtons" class="resultButtons hidden">
+        <button id="shareButton" class="resultButton">Xでシェア</button>
+        <button id="registerButton" class="resultButton">記録を登録</button>
+        <button id="retryButton" class="resultButton">もう1回遊ぶ</button>
+        <button id="arcadeButton" class="resultButton">カバゲーセンへ</button>
+      </div>
+    </section>
+
+  </div>
+
+  <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="game.js?v=20260530-1"></script>
+</body>
+</html>
