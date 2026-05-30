@@ -12,6 +12,7 @@ const gameScreen = document.getElementById("gameScreen");
 const resultScreen = document.getElementById("resultScreen");
 
 const titleImage = document.getElementById("titleImage");
+const startButton = document.getElementById("startButton");
 const backTitleButton = document.getElementById("backTitleButton");
 
 const playerSoldiersEl = document.getElementById("playerSoldiers");
@@ -39,6 +40,7 @@ let playerSoldiers = 100;
 let enemySoldiers = 100;
 let turn = 1;
 let currentEnemyPlan = "attack";
+let enemyPersonality = null;
 let acceptingInput = false;
 
 let lastScore = 0;
@@ -66,6 +68,24 @@ const ACTIONS = {
   }
 };
 
+const PERSONALITIES = [
+  {
+    name: "短気なタヌキ軍",
+    intro: "攻めることが多い。勢いに注意！",
+    weights: { attack: 50, defend: 25, flank: 25 }
+  },
+  {
+    name: "慎重なタヌキ軍",
+    intro: "守りを固めることが多い。",
+    weights: { attack: 25, defend: 50, flank: 25 }
+  },
+  {
+    name: "曲者のタヌキ軍",
+    intro: "回り込むことが多い。横の動きに注意！",
+    weights: { attack: 25, defend: 25, flank: 50 }
+  }
+];
+
 function showScreen(screen) {
   [titleScreen, gameScreen, resultScreen].forEach((s) => {
     s.classList.remove("active");
@@ -75,6 +95,7 @@ function showScreen(screen) {
 
 function playBgm() {
   if (!bgm) return;
+
   bgm.currentTime = 0;
   bgm.volume = 0.55;
   bgm.play().catch(() => {});
@@ -82,6 +103,7 @@ function playBgm() {
 
 function stopBgm() {
   if (!bgm) return;
+
   bgm.pause();
   bgm.currentTime = 0;
 }
@@ -93,19 +115,38 @@ function resetRegisterButton() {
   resultButtons.classList.add("hidden");
 }
 
+function setChoiceButtonsEnabled(enabled) {
+  choiceButtons.forEach((button) => {
+    button.disabled = !enabled;
+  });
+}
+
 function startGame() {
   playerSoldiers = 100;
   enemySoldiers = 100;
   turn = 1;
-  acceptingInput = true;
+  acceptingInput = false;
+
+  enemyPersonality =
+    PERSONALITIES[Math.floor(Math.random() * PERSONALITIES.length)];
 
   resetRegisterButton();
   updateStatus();
-  chooseEnemyPlan();
-
-  resultText.textContent = "兵法を選んでください";
   showScreen(gameScreen);
   playBgm();
+
+  hintText.textContent = "今回の相手";
+  resultText.innerHTML =
+    `${enemyPersonality.name}<br>${enemyPersonality.intro}`;
+
+  setChoiceButtonsEnabled(false);
+
+  setTimeout(() => {
+    chooseEnemyPlan();
+    resultText.textContent = "兵法を選んでください";
+    acceptingInput = true;
+    setChoiceButtonsEnabled(true);
+  }, 3000);
 }
 
 function updateStatus() {
@@ -114,15 +155,29 @@ function updateStatus() {
   turnCountEl.textContent = turn;
 }
 
-function chooseEnemyPlan() {
-  const keys = Object.keys(ACTIONS);
-  const truePlan = keys[Math.floor(Math.random() * keys.length)];
+function weightedRandom(weights) {
+  const entries = Object.entries(weights);
+  const total = entries.reduce((sum, [, value]) => sum + value, 0);
+  let rand = Math.random() * total;
 
-  // 80%は本当、20%はフェイント
-  const isFeint = Math.random() < 0.2;
+  for (const [key, value] of entries) {
+    rand -= value;
+    if (rand <= 0) return key;
+  }
+
+  return entries[0][0];
+}
+
+function chooseEnemyPlan() {
+  const truePlan = weightedRandom(enemyPersonality.weights);
+  const keys = Object.keys(ACTIONS);
+
+  // 70%は本当、30%はフェイント
+  const isFeint = Math.random() < 0.3;
   currentEnemyPlan = truePlan;
 
   let hintPlan = truePlan;
+
   if (isFeint) {
     const others = keys.filter((key) => key !== truePlan);
     hintPlan = others[Math.floor(Math.random() * others.length)];
@@ -139,7 +194,9 @@ function judge(playerAction, enemyAction) {
 
 function handleChoice(playerAction) {
   if (!acceptingInput) return;
+
   acceptingInput = false;
+  setChoiceButtonsEnabled(false);
 
   const enemyAction = currentEnemyPlan;
   const result = judge(playerAction, enemyAction);
@@ -171,7 +228,8 @@ function handleChoice(playerAction) {
   resultText.innerHTML =
     `${p.emoji} カバ軍は「${p.label}」！<br>` +
     `${e.emoji} タヌキ軍は「${e.label}」！<br>` +
-    `${resultLabel}`;
+    `${resultLabel}<br>` +
+    `カバ軍 -${playerDamage} / タヌキ軍 -${enemyDamage}`;
 
   updateStatus();
 
@@ -186,14 +244,15 @@ function handleChoice(playerAction) {
     chooseEnemyPlan();
     resultText.textContent = "兵法を選んでください";
     acceptingInput = true;
-  }, 1000);
+    setChoiceButtonsEnabled(true);
+  }, 1800);
 }
 
 function getRank(score, isWin) {
   if (!isWin || score <= 29) {
     return {
       title: "足軽隊長",
-      comment: "最後までよく戦った！次こそ勝利じゃ！",
+      comment: `相手は「${enemyPersonality.name}」だった！次こそ勝利じゃ！`,
       image: "tittle.png"
     };
   }
@@ -201,20 +260,21 @@ function getRank(score, isWin) {
   if (score <= 69) {
     return {
       title: "名軍師",
-      comment: "見事な読み合い！タヌキ軍を退けた！",
+      comment: `相手は「${enemyPersonality.name}」だった！見事な采配！`,
       image: "tittle.png"
     };
   }
 
   return {
     title: "天下統一",
-    comment: "圧巻の采配！戦国の世を平定した！",
+    comment: `相手は「${enemyPersonality.name}」だった！圧巻の大勝利！`,
     image: "tittle.png"
   };
 }
 
 function endGame() {
   acceptingInput = false;
+  setChoiceButtonsEnabled(false);
   stopBgm();
 
   const isWin = playerSoldiers > enemySoldiers;
@@ -250,7 +310,9 @@ function shareToX() {
     `#カバ合戦\n` +
     `#カバゲーセン`;
 
-  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  const url =
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+
   window.open(url, "_blank");
 }
 
@@ -290,11 +352,13 @@ async function registerScore() {
 function goTitle() {
   stopBgm();
   acceptingInput = false;
+  setChoiceButtonsEnabled(false);
   resetRegisterButton();
   showScreen(titleScreen);
 }
 
 titleImage.addEventListener("click", startGame);
+startButton.addEventListener("click", startGame);
 backTitleButton.addEventListener("click", goTitle);
 
 choiceButtons.forEach((button) => {
