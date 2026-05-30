@@ -307,22 +307,6 @@ button{
   text-shadow:3px 3px 0 #fff;
 }
 
-#resultImage{
-  width:min(78vw,330px);
-
-  max-height:280px;
-
-  object-fit:contain;
-
-  image-rendering:pixelated;
-
-  border:4px solid #2b2118;
-
-  box-shadow:5px 5px 0 #6b4a2b;
-
-  background:#fff7d6;
-}
-
 .resultPanel{
   width:min(92%,360px);
 
@@ -440,10 +424,6 @@ button{
   .choiceButton{
     min-height:68px;
     font-size:14px;
-  }
-
-  #resultImage{
-    max-height:220px;
   }
 
 }

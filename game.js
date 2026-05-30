@@ -23,7 +23,6 @@ const resultText = document.getElementById("resultText");
 
 const choiceButtons = document.querySelectorAll(".choiceButton");
 
-const resultImage = document.getElementById("resultImage");
 const rankTitleEl = document.getElementById("rankTitle");
 const finalScoreEl = document.getElementById("finalScore");
 const resultCommentEl = document.getElementById("resultComment");
@@ -286,7 +285,6 @@ function endGame() {
   rankTitleEl.textContent = rank.title;
   finalScoreEl.textContent = lastScore;
   resultCommentEl.textContent = rank.comment;
-  resultImage.src = rank.image;
 
   resetRegisterButton();
   showScreen(resultScreen);
