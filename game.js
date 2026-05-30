@@ -369,7 +369,7 @@ choiceButtons.forEach((button) => {
 
 shareButton.addEventListener("click", shareToX);
 registerButton.addEventListener("click", registerScore);
-retryButton.addEventListener("click", startGame);
+retryButton.addEventListener("click", goTitle);
 arcadeButton.addEventListener("click", () => {
   window.location.href = "https://afoolhippo.github.io/home/?skipTitle=1";
 });
